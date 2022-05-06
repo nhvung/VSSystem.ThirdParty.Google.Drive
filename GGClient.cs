@@ -168,8 +168,6 @@ namespace VSSystem.ThirdParty.Google.Drive
                         File ggFile = new File();
                         ggFile.Name = uploadFileName;
                         ggFile.Parents = new List<string>() { folderID };
-
-
                         using (var fs = localFile.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
                         {
                             var uploadRequest = service.Files.Create(ggFile, fs, "");
@@ -247,6 +245,34 @@ namespace VSSystem.ThirdParty.Google.Drive
             return false;
         }
 
+        public async Task<string> SetPermission(string fileID)
+        {
+            string result = string.Empty;
+            try
+            {
+                Permission permissionObj = new Permission();
+                permissionObj.Type = "anyone";
+                permissionObj.Role = "reader";
+                permissionObj.AllowFileDiscovery = true;
+
+                if (_credential == null)
+                {
+                    await _Init();
+                }
+                if (_credential != null)
+                {
+                    var service = new DriveService(new BaseClientService.Initializer()
+                    {
+                        HttpClientInitializer = _credential,
+                    });
+
+                    var resPermissionObj = await service.Permissions.Create(permissionObj, fileID).ExecuteAsync();
+                    result = resPermissionObj.Id;
+                }
+            }
+            catch { }
+            return result;
+        }
         public async Task<string> GetShareFileLink(string fileID)
         {
             string result = string.Empty;
