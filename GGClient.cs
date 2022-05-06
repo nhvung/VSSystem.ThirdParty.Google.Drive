@@ -246,6 +246,36 @@ namespace VSSystem.ThirdParty.Google.Drive
             catch { }
             return false;
         }
+
+        public async Task<string> GetShareFileLink(string fileID)
+        {
+            string result = string.Empty;
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileID))
+                {
+                    return result;
+                }
+                if (_credential == null)
+                {
+                    await _Init();
+                }
+                if (_credential != null)
+                {
+                    var service = new DriveService(new BaseClientService.Initializer()
+                    {
+                        HttpClientInitializer = _credential,
+                    });
+                    var request = service.Files.Get(fileID);
+                    request.Fields = "*";
+                    var response = request.Execute();
+                    result = response.WebViewLink;
+                }
+            }
+            catch { }
+            return result;
+        }
+
     }
 }
 
